@@ -8,7 +8,7 @@ Works cross-realm/iframe and despite @@toStringTag.
 
 ## Installation
 
-[Node.js](http://nodejs.org/) `>= 4` is required. To install, type this at the command line:
+[Node.js](http://nodejs.org/) `>= 6` is required. To install, type this at the command line:
 ```shell
 npm install isurl
 ```
@@ -34,7 +34,7 @@ isURL.lenient(url);  //-> true
 
 
 [npm-image]: https://img.shields.io/npm/v/isurl.svg
-[npm-url]: https://npmjs.org/package/isurl
+[npm-url]: https://npmjs.com/package/isurl
 [travis-image]: https://img.shields.io/travis/stevenvachon/isurl.svg
 [travis-url]: https://travis-ci.org/stevenvachon/isurl
 [greenkeeper-image]: https://badges.greenkeeper.io/stevenvachon/isurl.svg

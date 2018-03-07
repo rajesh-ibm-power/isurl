@@ -1,70 +1,33 @@
 "use strict";
-const expect = require("chai").expect;
+const customizeURL = require("incomplete-url");
+const {expect} = require("chai");
 const isURL = require("./");
-const parseURL = require("url").parse;
-const semver = require("semver");
-
-const atLeastNode6 = semver.satisfies(process.version, ">= 6");
-
-const it_atLeastNode6 = atLeastNode6 ? it : it.skip;
-
-let URL,URLSearchParams;
-
-if (atLeastNode6)
-{
-	const uurl = require("universal-url");
-	URL = uurl.URL,
-    URLSearchParams = uurl.URLSearchParams;
-}
-
-
-
-it_atLeastNode6("accepts a full implemention", function()
-{
-	expect( isURL(new URL("http://domain/")) ).to.be.true;
-	expect( isURL(new URL("http://domain/"),false) ).to.be.true;
-});
-
-
-
-it_atLeastNode6("can accept a partial implemention", function()
-{
-	function IncompleteURL(url, base)
-	{
-		this.url = new URL(url, base);
-
-		// Extend all `URL` getters except `searchParams`
-		Object.keys(URL.prototype)
-		.filter(key => key !== "searchParams")
-		.forEach(key => Object.defineProperty
-		(
-			this, key,
-			{
-				get: () => this.url[key],
-				set: newValue => this.url[key] = newValue
-			}
-		));
-	}
-
-	expect( isURL(new IncompleteURL("http://domain/")) ).to.be.false;
-	expect( isURL.lenient(new IncompleteURL("http://domain/")) ).to.be.true;
-});
+const {parse: parseURL} = require("url");
+const {URL, URLSearchParams} = require("universal-url");
 
 
 
 it("rejects non-URLs", function()
 {
-	expect( isURL("http://domain/") ).to.be.false;
-	expect( isURL(parseURL("http://domain/")) ).to.be.false;
-	expect( isURL(Symbol("http://domain/")) ).to.be.false;
-	expect( isURL({}) ).to.be.false;
-	expect( isURL([]) ).to.be.false;
-	expect( isURL(/regex/) ).to.be.false;
-	expect( isURL(true) ).to.be.false;
-	expect( isURL(1) ).to.be.false;
-	expect( isURL(null) ).to.be.false;
-	expect( isURL(undefined) ).to.be.false;
-	expect( isURL() ).to.be.false;
+	const fixtures =
+	[
+		"http://domain/",
+		parseURL("http://domain/"),
+		Symbol("http://domain/"),
+		{},
+		[],
+		/regex/,
+		true,
+		1,
+		null,
+		undefined
+	];
+
+	fixtures.forEach(fixture =>
+	{
+		expect( isURL(fixture) ).to.be.false;
+		expect( isURL.lenient(fixture) ).to.be.false;
+	});
 });
 
 
@@ -76,6 +39,25 @@ it("rejects a mocked partial implementation using toStringTag", function()
 	mock[Symbol.toStringTag] = "URL";
 
 	expect( isURL(mock) ).to.be.false;
+	expect( isURL.lenient(mock) ).to.be.false;
+});
+
+
+
+it("accepts a full implemention", function()
+{
+	expect( isURL(new URL("http://domain/")) ).to.be.true;
+	expect( isURL.lenient(new URL("http://domain/")) ).to.be.true;
+});
+
+
+
+it("can accept a partial implemention", function()
+{
+	const {IncompleteURL} = customizeURL({ noSearchParams:true });
+
+	expect( isURL(new IncompleteURL("http://domain/")) ).to.be.false;
+	expect( isURL.lenient(new IncompleteURL("http://domain/")) ).to.be.true;
 });
 
 
